@@ -22,7 +22,7 @@ class SweepSurfPTv3(nn.Module):
 
         # Decoder MLP
         self.decoder = nn.Sequential(
-            nn.Linear(self.latent_dim, 64),
+            nn.Linear(64, 64),
             nn.ReLU(),
             nn.Linear(64, 64),
             nn.ReLU(),
@@ -34,7 +34,9 @@ class SweepSurfPTv3(nn.Module):
         B, N, _ = pts.shape
 
         flattened_pts = pts.view(-1, 3)
-        batch_indices = torch.arange(B).unsqueeze(1).expand(B, N).reshape(-1)
+        batch_indices = (
+            torch.arange(B).unsqueeze(1).expand(B, N).reshape(-1).to(pts.device)
+        )
         pts_feature = self.point_embed(flattened_pts.unsqueeze(0)).squeeze(0)
 
         ptv3_data = {
@@ -48,10 +50,6 @@ class SweepSurfPTv3(nn.Module):
 
         # batch = point.batch
         feature = point.feat
-
-        print(pts.shape)
-        print(flattened_pts.shape)
-        print(feature.shape)
 
         feature = feature.view(B, N, -1)
 

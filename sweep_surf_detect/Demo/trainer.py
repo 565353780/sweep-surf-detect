@@ -14,8 +14,8 @@ def demo():
     assert dataset_root_folder_path is not None
     print(dataset_root_folder_path)
 
-    batch_size = 2
-    accum_iter = 32
+    batch_size = 64
+    accum_iter = 1
     num_workers = 16
     model_file_path = "./output/v1/model_last.pth"
     model_file_path = None
@@ -31,7 +31,7 @@ def demo():
     ema_decay = 0.999
     save_result_folder_path = "auto"
     save_log_folder_path = "auto"
-    best_model_metric_name = None
+    best_model_metric_name = "Loss"
     is_metric_lower_better = True
     sample_results_freq = 1
     use_amp = True

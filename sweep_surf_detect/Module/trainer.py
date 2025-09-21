@@ -40,7 +40,7 @@ class Trainer(BaseTrainer):
         self.is_curve_closed = False
         self.num_plane_curve_ctrlpts = 3
         self.is_plane_curve_closed = False
-        self.epoch_size = 10000
+        self.epoch_size = 100000
         self.num_sample_surf_pts = 1000
 
         self.latent_dim = 512
@@ -107,9 +107,7 @@ class Trainer(BaseTrainer):
             }
 
         if "eval" in self.dataloader_dict.keys():
-            self.dataloader_dict["eval"]["dataset"].paths_list = self.dataloader_dict[
-                "eval"
-            ]["dataset"].paths_list[:4]
+            self.dataloader_dict["eval"]["dataset"].epoch_size = 4
 
         return True
 

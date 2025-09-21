@@ -57,7 +57,7 @@ class SweepSurfDataset(Dataset):
 
         sample_pts = []
         for i in range(random_t.shape[0]):
-            sample_point = sweep_surf.querySurfPoint(**random_t[i])
+            sample_point = sweep_surf.querySurfPoint(random_t[i][0], random_t[i][1])
             sample_pts.append(sample_point)
 
         sample_pts = np.array(sample_pts)
