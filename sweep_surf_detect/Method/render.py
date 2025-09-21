@@ -4,35 +4,30 @@ import matplotlib.pyplot as plt
 from sweep_surf_detect.Data.curve import Curve
 
 
-def visualize_curve_with_frames(curve: Curve, t_samples=30):
+def plot_curve_with_frames(curve: Curve, samples=30, axis_len=0.1):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection="3d")
 
-    # 曲线采样
-    ts = np.linspace(0, 1, t_samples)
-    pts = np.array([curve.evaluate(t) for t in ts])
-    ax.plot(pts[:, 0], pts[:, 1], pts[:, 2], label="Interpolated Curve", color="blue")
+    ts = np.linspace(0, 1, samples)
+    points = np.array([curve._get_point(t) for t in ts])
 
-    # 控制点
-    ax.scatter(
-        curve.control_points[:, 0],
-        curve.control_points[:, 1],
-        curve.control_points[:, 2],
-        c="r",
-        label="Control Points",
-    )
+    ax.plot(points[:, 0], points[:, 1], points[:, 2], "b-", label="Curve")
 
-    # 局部坐标系
-    for t in np.linspace(0, 1, t_samples):
+    for t in ts:
         T = curve.queryTransform(t)
-        o = T[:3, 3]
-        x, y, z = T[:3, 0], T[:3, 1], T[:3, 2]
-        s = 0.2
-        ax.quiver(*o, *(x * s), color="r")
-        ax.quiver(*o, *(y * s), color="g")
-        ax.quiver(*o, *(z * s), color="b")
+        origin = T[:3, 3]
+        x_axis = T[:3, 0] * axis_len
+        y_axis = T[:3, 1] * axis_len
+        z_axis = T[:3, 2] * axis_len
 
-    ax.set_title("Hermite-style Interpolated Curve with Tangents")
-    ax.legend()
+        ax.quiver(*origin, *x_axis, color="r", length=axis_len, normalize=True)
+        ax.quiver(*origin, *y_axis, color="g", length=axis_len, normalize=True)
+        ax.quiver(*origin, *z_axis, color="b", length=axis_len, normalize=True)
+
+    ax.set_xlabel("X")
+    ax.set_ylabel("Y")
+    ax.set_zlabel("Z")
+    ax.set_title("Curve with Local Coordinate Frames")
+    ax.legend(["Curve", "X axis", "Y axis", "Z axis"])
     ax.set_box_aspect([1, 1, 1])
     plt.show()
