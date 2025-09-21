@@ -1,14 +1,17 @@
 import numpy as np
+from typing import Union
 from scipy.interpolate import CubicSpline
+
+from sweep_surf_detect.Method.normal import generate_tangents
 
 
 class Curve:
     def __init__(
         self,
         points: np.ndarray,
-        tangents: np.ndarray,
-        normals: np.ndarray,
         is_closed=False,
+        tangents: Union[np.ndarray, None] = None,
+        normals: Union[np.ndarray, None] = None,
     ):
         """
         points: (N,3) 控制点
@@ -17,13 +20,71 @@ class Curve:
         is_closed: bool，是否闭合曲线
         """
         self.points = points
-        self.normals = normals
-        self.tangents = tangents
         self.is_closed = is_closed
+
         self.N = len(points)
+
+        if tangents is None:
+            self.tangents = generate_tangents(
+                self.points, noise_scale=0.01, is_closed=self.is_closed
+            )
+        else:
+            self.tangents = tangents
+
+        if normals is None:
+            self.normals = np.random.randn(self.N, 3)
+        else:
+            self.normals = normals
+
+        self._orthonormalize()
 
         self.ts = np.linspace(0, 1, self.N, endpoint=not is_closed)
         self._build_spline()
+        return
+
+    def _orthonormalize(self):
+        """
+        归一化tangents和normals，并正交化法线，使其垂直于切线
+        """
+        for i in range(self.N):
+            t = self.tangents[i]
+            n = self.normals[i]
+
+            # 归一化
+            t = t / np.linalg.norm(t)
+            n = n / np.linalg.norm(n)
+
+            # Gram-Schmidt正交化法线：去除法线在切线方向的分量
+            n = n - np.dot(n, t) * t
+            n_norm = np.linalg.norm(n)
+            if n_norm < 1e-8:
+                # 如果法线接近平行切线，尝试生成一个垂直向量
+                if abs(t[0]) < 0.9:
+                    n = np.cross(t, [1, 0, 0])
+                else:
+                    n = np.cross(t, [0, 1, 0])
+                n = n / np.linalg.norm(n)
+            else:
+                n = n / n_norm
+
+            self.tangents[i] = t
+            self.normals[i] = n
+
+        # 闭合曲线时保证首尾切线方向一致（若需要）
+        if self.is_closed:
+            # 这里简单取首尾切线平均后归一化
+            avg_t = self.tangents[0] + self.tangents[-1]
+            avg_t /= np.linalg.norm(avg_t)
+            self.tangents[0] = avg_t
+            self.tangents[-1] = avg_t
+
+            # 同样对法线进行调整，保持正交
+            avg_n = self.normals[0] + self.normals[-1]
+            # 去除法线在切线方向的分量
+            avg_n = avg_n - np.dot(avg_n, avg_t) * avg_t
+            avg_n /= np.linalg.norm(avg_n)
+            self.normals[0] = avg_n
+            self.normals[-1] = avg_n
 
     def _build_spline(self):
         if self.is_closed:
