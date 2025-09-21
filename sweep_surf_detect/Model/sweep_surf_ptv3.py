@@ -27,6 +27,7 @@ class SweepSurfPTv3(nn.Module):
             nn.Linear(64, 64),
             nn.ReLU(),
             nn.Linear(64, 2),
+            nn.Sigmoid(),
         )
         return
 
