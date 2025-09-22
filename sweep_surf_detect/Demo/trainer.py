@@ -14,10 +14,10 @@ def demo():
     assert dataset_root_folder_path is not None
     print(dataset_root_folder_path)
 
-    batch_size = 64
+    batch_size = 8
     accum_iter = 1
     num_workers = 16
-    model_file_path = "./output/v1/model_last.pth"
+    model_file_path = "./output/v1/model_best.pth"
     model_file_path = None
     weights_only = False
     device = "auto"
@@ -25,7 +25,7 @@ def demo():
     warm_step_num = 100
     finetune_step_num = -1
     lr = 1e-4
-    lr_batch_size = 64
+    lr_batch_size = 8
     ema_start_step = 5000
     ema_decay_init = 0.99
     ema_decay = 0.999

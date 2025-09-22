@@ -6,7 +6,7 @@ from sweep_surf_detect.Method.render import plot_plane_curve_with_tangents
 
 def test():
     num_control_points = 5
-    is_closed = True
+    is_closed = False
     t_samples = 100
 
     control_points = np.random.randn(num_control_points, 2)

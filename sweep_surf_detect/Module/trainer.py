@@ -40,10 +40,10 @@ class Trainer(BaseTrainer):
         self.is_curve_closed = False
         self.num_plane_curve_ctrlpts = 3
         self.is_plane_curve_closed = False
-        self.epoch_size = 100000
-        self.num_sample_surf_pts = 1000
+        self.epoch_size = 10000
+        self.num_sample_surf_pts = 10000
 
-        self.latent_dim = 512
+        self.latent_dim = 128
 
         self.gt_sample_added_to_logger = False
 
@@ -121,10 +121,20 @@ class Trainer(BaseTrainer):
         gt_t = data_dict["t"]
         pred_t = result_dict["t"]
 
+        with torch.no_grad():
+            diff = torch.abs(pred_t - gt_t)
+            total = gt_t.numel()
+            acc_1 = (diff < 0.01).sum().item() / total
+            acc_2 = (diff < 0.1).sum().item() / total
+            acc_3 = (diff < 0.2).sum().item() / total
+
         loss = self.loss_fn(pred_t, gt_t)
 
         loss_dict = {
             "Loss": loss,
+            "1%Acc": acc_1,
+            "10%Acc": acc_2,
+            "20%Acc": acc_3,
         }
 
         return loss_dict
